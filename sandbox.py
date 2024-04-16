@@ -9,6 +9,7 @@ def enter_walk_mode():
     """
     global walk_mode_entered
     if not walk_mode_entered:
+        walk_mode_entered = True  # Set the flag to indicate that walk mode has been entered
         # Find the active 3D Viewport area
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D':
@@ -21,7 +22,6 @@ def enter_walk_mode():
                 # Enter Walk Mode
                 with bpy.context.temp_override(**context_override):
                     bpy.ops.view3d.walk('INVOKE_DEFAULT')
-                    walk_mode_entered = True
                     # Check if gamemode.py exists
                     if os.path.isfile("gamemode.py"):
                         try:
@@ -63,6 +63,7 @@ def check_3d_viewport(fullscreen: bool):
                     try:
                         with bpy.context.temp_override(area=area): # makes area fullscreen
                             bpy.ops.screen.screen_full_area()
+                            enter_walk_mode()  # Enter walk mode after making the area fullscreen
                     except Exception as e:
                         print("Woops. Error toggling fullscreen:", e)
     if not viewport_exists:
@@ -75,11 +76,13 @@ def check_3d_viewport(fullscreen: bool):
             if fullscreen:
                 # Use a timer to ensure that walk navigation is executed after the viewport is maximized
                 bpy.app.timers.register(lambda: toggle_fullscreen_and_walk(), first_interval=0.1)
+                bpy.app.timers.register(lambda: enter_walk_mode(), first_interval=0.2)  # Delay entering walk mode
         else:
             area.type = 'VIEW_3D'
             if fullscreen:
                 # Use a timer to ensure that walk navigation is executed after the viewport is maximized
                 bpy.app.timers.register(lambda: toggle_fullscreen_and_walk(), first_interval=0.1)
+                bpy.app.timers.register(lambda: enter_walk_mode(), first_interval=0.2)  # Delay entering walk mode
 
 # Define handler function to execute when area type becomes VIEW_3D
 def on_area_change_handler(dummy):
