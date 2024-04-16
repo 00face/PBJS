@@ -1,4 +1,5 @@
 import bpy
+import os
 
 walk_mode_entered = False
 
@@ -21,6 +22,13 @@ def enter_walk_mode():
                 with bpy.context.temp_override(**context_override):
                     bpy.ops.view3d.walk('INVOKE_DEFAULT')
                     walk_mode_entered = True
+                    # Check if gamemode.py exists
+                    if os.path.isfile("gamemode.py"):
+                        try:
+                            # Execute gamemode.py
+                            bpy.ops.script.python_file_run(filepath="gamemode.py")
+                        except Exception as e:
+                            print("Failed to execute gamemode.py:", e)
                 return
 
 def toggle_fullscreen_and_walk():
